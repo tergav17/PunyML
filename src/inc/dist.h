@@ -11,6 +11,6 @@ typedef struct f_pair {
 void dist_init();
 float dist_randf();
 f_pair_t dist_gauss();
-void dist_he_fill(float *a, int cnt, int in); 
+void dist_he_init(float *a, int cnt, int in); 
 
 #endif

@@ -2,35 +2,24 @@
 #define NET_H
 
 #include "matrix.h"
+#include "layer.h"
 
 /* Types and structs */
-// 
-typedef float (*afunc)(float);
 
-//Individual neural network weight layer
-typedef struct layer {
-	matrix_t *weight;
-	matrix_t *bias;
-	
-	int isize;
-	int osize;
-	
-	afunc activation;
-	afunc derivative;
-} layer_t;
-
-// Neural network datastructure
+// Neural network data structure
 typedef struct network {
-	layer_t *layers;
-	int lcnt;
-	
-	matrix_t **cache;
-	int ccnt;
+	layer_t *layer_head;
+	layer_t *layer_tail;
+	int depth;
 	
 	int isize;
 	int osize;
 } network_t;
 
-
+/* Prototypes */
+matrix_t *net_execute(network_t *net, matrix_t *in);
+void net_add_layer(network_t *net, int size, actf_t act, actf_t der, initf_t init);
+network_t *net_new(int size);
+void net_free(network_t *n);
 
 #endif

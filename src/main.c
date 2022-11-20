@@ -1,26 +1,26 @@
 #include <stdio.h>
-#include "inc/dist.h"
+#include "inc/layer.h"
 #include "inc/matrix.h"
+#include "inc/dist.h"
+#include "inc/net.h"
+#include "inc/active.h"
 
 int main()
 {
-	matrix_t *a,*b;
+	network_t *net;
+	matrix_t *input;
 	
-	// Init random seed to time
+	// Init random seeds
 	dist_init();
 	
-	a = matrix_new(2,2);
-	a->values[0][0] = 1;
-	a->values[0][1] = 2;
-	a->values[1][0] = 3;
-	a->values[1][1] = 4;
-
-
-	b = matrix_new(2,2);
-	b->values[0][0] = 7;
-	b->values[0][1] = 8;
-	b->values[1][0] = 9;
-	b->values[1][1] = 10;
+	net = net_new(2);
 	
-	matrix_print(matrix_nsub(a,b));
+	net_add_layer(net, 4, &active_relu, &active_relu_der, &dist_he_init);
+	net_add_layer(net, 4, &active_relu, &active_relu_der, &dist_he_init);
+	
+	input = matrix_new(1, 2);
+	input->values[0][0] = 1.0;
+	input->values[1][0] = 1.0;
+	
+	matrix_print(net_execute(net, input));
 }

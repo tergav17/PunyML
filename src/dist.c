@@ -56,7 +56,7 @@ f_pair_t dist_gauss()
  * cnt = Number of values to generate
  * in = Inputs per node
  */
-void dist_he_fill(float *a, int cnt, int in)
+void dist_he_init(float *a, int cnt, int in)
 {
 	
 	f_pair_t p;

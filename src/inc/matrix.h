@@ -1,9 +1,14 @@
+/*
+ * It should be noted that matrix values arrays are addressed as follows:
+ *
+ * l->values[ROW][COL] or l->values[Y][X]
+ */
+
 #ifndef MATRIX_H
 #define MATRIX_H
 
-#endif
-
 /* Types and structs */
+// Matrix struct
 typedef struct matrix {
 	int width;
 	int height;
@@ -20,3 +25,5 @@ matrix_t *matrix_nsub(matrix_t *a, matrix_t *b);
 matrix_t *matrix_new(int width, int height);
 void matrix_free(matrix_t *m);
 void matrix_print(matrix_t *m);
+
+#endif
