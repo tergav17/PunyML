@@ -41,14 +41,14 @@ void layer_execute(layer_t *l, matrix_t *prev)
 	if (!l || !prev) return;
 	
 	// Multiply the weight by the results of the last layer
-	matrix_mul(l->weight, prev, l->result);
+	matrix_mul(l->weight, prev, l->z);
 	
 	// Add the bias
-	matrix_add(l->result, l->bias, l->result);
+	matrix_add(l->result, l->bias, l->z);
 	
 	// Now run everything through the activation function
 	for (i = 0; i < l->result->height; i++)
-		l->result->values[i][0] = l->act(l->result->values[i][0]);
+		l->result->values[i][0] = l->act(l->z->values[i][0]);
 }
 
 /*
@@ -73,9 +73,10 @@ layer_t *layer_new(int isize, int osize, actf_t act, actf_t der)
 	new->act = act;
 	new->der = der;
 	
-	// Create weight, bias, cache matrix
+	// Create weight, bias, z, result matrix
 	new->weight = matrix_new(isize, osize);
 	new->bias = matrix_new(1, osize);
+	new->z = matrix_new(1, osize);
 	new->result = matrix_new(1, osize);
 	
 	// Set the input and output sizes
@@ -99,6 +100,7 @@ void layer_free(layer_t *l)
 	// Free matrixes
 	matrix_free(l->weight);
 	matrix_free(l->bias);
+	matrix_free(l->z);
 	matrix_free(l->result);
 	
 	// Free struct

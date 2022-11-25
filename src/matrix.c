@@ -161,6 +161,94 @@ matrix_t *matrix_nsub(matrix_t *a, matrix_t *b)
 }
 
 /*
+ * Peforms a transposition for matrix A into matrix B
+ * No error checking is performed, caller should already know the bounds of A^T=B
+ *
+ * a = Pointer to matrix A
+ * b = Pointer to matrix B
+ */
+void matrix_trans(matrix_t *a, matrix_t *b)
+{
+	int x,y;
+	
+	// Just shift the data around
+	for (y = 0; y < a->height; y++)
+		for (x = 0; x < a->width; x++)
+			b->values[x][y] = a->values[y][x];
+	
+}
+
+/*
+ * Performs the transposition of matrix A
+ * Creates a new matrix struct and stores the result in it
+ * Error checking is performed, NULL is returned on error
+ *
+ * a = Pointer to matrix A
+ *
+ * Returns pointer to matrix B
+ */
+matrix_t *matrix_ntrans(matrix_t *a)
+{
+	matrix_t *b;
+	
+	// Make sure that matrix struct exists
+	if (!a) return NULL;
+	
+	// Create new matrix and transpose
+	b = matrix_new(a->height, a->width);
+	matrix_trans(a, b);
+	
+	return b;
+}
+
+
+/*
+ * Performs a hadamard product of matrix A and matrix B into matrix C
+ * No error checking is performed, caller should already know the bounds of A.B=C
+ *
+ * a = Pointer to matrix A
+ * b = Pointer to matrix B
+ * c = Pointer to matrix C
+ */
+void matrix_prod(matrix_t *a, matrix_t *b, matrix_t *c)
+{
+	int x,y;
+	
+	// Multiply 'em
+	for (y = 0; y < a->height; y++)
+		for (x = 0; x < a->width; x++)
+			c->values[y][x] = a->values[y][x] * b->values[y][x];
+			
+}
+
+/*
+ * Performs the hadamard product of matrix A and matrix B
+ * Creates a new matrix struct and stores the result in it
+ * Error checking is performed, NULL is returned on error
+ *
+ * a = Point to matrix A
+ * b = Pointer to matrix B
+ *
+ * Returns pointer to matrix C
+ */
+matrix_t *matrix_nprod(matrix_t *a, matrix_t *b)
+{
+	matrix_t *c;
+	
+	// Make sure that matrix structs exist
+	if (!a || !b) return NULL;
+	
+	// Checks to see if matrix bounds are the same
+	if (a->width != b->width || a->height != b->height) return NULL;
+	
+	// Create new matrix and produce
+	c = matrix_new(a->height, a->width);
+	matrix_prod(a, b, c);
+	
+	return c;
+	
+}
+/*
  * Allocates memory for a new matrix struct
  *
  * width = Width of new matrix

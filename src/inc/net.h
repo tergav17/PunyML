@@ -3,6 +3,7 @@
 
 #include "matrix.h"
 #include "layer.h"
+#include "net.h"
 
 /* Types and structs */
 

@@ -21,7 +21,9 @@ typedef struct layer {
 	actf_t act;			// Activation function
 	actf_t der;			// Derivative of activation function
 	
-	matrix_t *result;	// Calculation intermediate
+	matrix_t *z;		// Calculate intermediate
+	matrix_t *result;	// Calculation result
+	
 	struct layer *next;	// Next layer, if available
 	struct layer *prev;	// Previous layer, if available
 } layer_t;
