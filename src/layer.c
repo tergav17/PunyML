@@ -44,7 +44,7 @@ void layer_execute(layer_t *l, matrix_t *prev)
 	matrix_mul(l->weight, prev, l->z);
 	
 	// Add the bias
-	matrix_add(l->result, l->bias, l->z);
+	matrix_add(l->z, l->bias, l->z);
 	
 	// Now run everything through the activation function
 	for (i = 0; i < l->result->height; i++)

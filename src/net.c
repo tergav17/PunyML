@@ -7,6 +7,7 @@
 #include "inc/net.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 /*
  * Feeds a set of inputs into the network, and returns the result
@@ -39,7 +40,7 @@ matrix_t *net_execute(network_t *net, matrix_t *in)
 		layer_execute(curr_layer->next, result);
 		
 		// Advance to next layer
-		result = curr_layer->result;
+		result = curr_layer->next->result;
 		curr_layer = curr_layer->next;
 	}
 	

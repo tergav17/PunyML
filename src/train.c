@@ -11,9 +11,9 @@
 
 /*
  * Calculates the cost value for a result and desired outcome
- * res = Result
  *
- * des = Desired outcome
+ * res = Result matrix
+ * des = Desired outcome matrix
  *
  * Returns cost value
  */
@@ -32,6 +32,33 @@ float train_cost(matrix_t *res, matrix_t *des)
 	return cost;
 }
 
+/*
+ * Feeds forwards the network through multiple sample and returns an average cost
+ *
+ * net = Neural network struct
+ * batch = Batch of samples
+ */
+float train_cost_batch(network_t *net, batch_t *batch)
+{
+	int i;
+	float cost;
+	
+	cost = 0;
+	for (i = 0; i < batch->count; i++) {
+		cost += train_cost(net_execute(net, batch->samples[i]->input), batch->samples[i]->output);
+	}
+	cost /= (float) batch->count;
+	
+	return cost;
+}
+
+/*
+ * Calculates the derivative of the cost value, returned in matrix cost
+ *
+ * res = Result matrix
+ * des = Desired outcome matrix
+ * cost = Derivative of cost matrix
+ */
 void train_cost_d(matrix_t *res, matrix_t *des, matrix_t *cost)
 {
 	matrix_sub(res, des, cost);
@@ -45,11 +72,10 @@ void train_cost_d(matrix_t *res, matrix_t *des, matrix_t *cost)
  * Updates weights in a network based on a batch of training data
  *
  * net = Pointer to neural network struct
+ * batch = Pointer to training set
  * rate = Learning rate
- * samples = Pointer to training set
- * cnt = Number of samples in training set
  */
-void train_batch(network_t *net, float rate, sample_t *samples, int cnt)
+void train_batch(network_t *net, batch_t *batch, float rate)
 {
 	int i, x, y;
 	float m;
@@ -96,11 +122,11 @@ void train_batch(network_t *net, float rate, sample_t *samples, int cnt)
 	}
 	
 	// Now we can run back propigation on all of the training samples
-	for (i = 0; i < cnt; i++)
-		train_backprop(net, samples+i, grad_w, grad_b, delta_w, delta_b);
+	for (i = 0; i < batch->count; i++)
+		train_backprop(net, batch->samples[i], grad_w, grad_b, delta_w, delta_b);
 	
 	// Finally, update the weights
-	m = rate / ((float) cnt);
+	m = rate / ((float) batch->count);
 	
 	// Iterate through the different layers and update
 	l = net->layer_head;
@@ -153,14 +179,15 @@ void train_backprop(network_t *net, sample_t *sample, matrix_t **grad_w, matrix_
 	layer_t *l;
 	
 	// Sanity check for training sample
-	if (sample->input->height != net->isize || sample->input->width != 0) {
-		printf("	FAULT: INPUT MISMATCH ON SAMPLE RECORD %d, SKIPPING\n", sample->serial);
+	if (sample->input->height != net->isize || sample->input->width != 1) {
+		printf("	Input mismatch of sample record #%d! Sample=%dx%d, Network=%d\n", sample->serial, sample->input->width, sample->input->height, net->isize);
 		return;
 	}
-	if (sample->output->height != net->osize || sample->output->width != 0) {
-		printf("	FAULT: OUTPUT MISMATCH ON SAMPLE RECORD %d, SKIPPING\n", sample->serial);
+	if (sample->output->height != net->osize || sample->output->width != 1) {
+		printf("	Input mismatch of sample record #%d! Sample=%dx%d, Network=%d\n", sample->serial, sample->output->width, sample->output->height, net->osize);
 		return;
 	}
+	
 	// Feed forward the training sample
 	net_execute(net, sample->input);
 	
@@ -177,9 +204,7 @@ void train_backprop(network_t *net, sample_t *sample, matrix_t **grad_w, matrix_
 	train_cost_d(net->layer_tail->result, sample->output, delta_b[i]);
 	for (y = 0; y < net->osize; y++)
 		delta_b[i]->values[y][0] *= net->layer_tail->der(net->layer_tail->z->values[y][0]);
-			
-	
-			
+				
 	// Add to bias gradient (BP3)
 	matrix_add(grad_b[i], delta_b[i], grad_b[i]);
 	
@@ -200,8 +225,8 @@ void train_backprop(network_t *net, sample_t *sample, matrix_t **grad_w, matrix_
 	
 	// Add to weight gradient
 	matrix_add(grad_w[i], delta_w[i], grad_w[i]);
-		
-	// Now, we start back propigating
+			
+	// Now, we start back propagating
 	l = net->layer_tail->prev;
 	i--;
 	while (l) {
@@ -213,7 +238,7 @@ void train_backprop(network_t *net, sample_t *sample, matrix_t **grad_w, matrix_
 		matrix_mul(wet, delta_b[i+1], delta_b[i]);
 		
 		// Add derivative of activation function 
-		for (y = 0; i < l->result->height; y++)
+		for (y = 0; y < l->result->height; y++)
 			delta_b[i]->values[y][0] += l->der(l->z->values[y][0]);
 		
 		// Free newly created matrix
