@@ -22,6 +22,10 @@ void matrix_mul(matrix_t *a, matrix_t *b, matrix_t *c)
 	int x,y,z;
 	float tmp;
 	
+	// Checks to see if rows and columns line up
+	if (a->width != b->height) printf("Argument mismatch!\n");
+	if (c->width != b->width || c->height != a->height) printf("Return mismatch!\n");
+	
 	for (y = 0; y < c->height; y++) {
 		for (x = 0; x < c->width; x++) {
 			// Calculate sum of products for this position in the matrix

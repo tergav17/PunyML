@@ -65,7 +65,36 @@ void train_cost_d(matrix_t *res, matrix_t *des, matrix_t *cost)
 }
 
 
-
+int train_correct(network_t *net, batch_t *batch)
+{
+	int i, j, max_index, correct;
+	matrix_t *activations;
+	float max_act;
+	
+	// Start correct count at 0
+	correct = 0;
+	
+	// Check each batch
+	for (i = 0; i < batch->count; i++) {
+		max_act = -1.0;
+		max_index = -1;
+		
+		activations = net_execute(net, batch->samples[i]->input);
+		
+		// Search for the output index with the largest
+		for (j = 0; j < activations->height; j++) {
+			if (activations->values[j][0] > max_act) {
+				max_act = activations->values[j][0];
+				max_index = j;
+			}
+		}
+		
+		// See if it is the correct result from the sample
+		if (batch->samples[i]->output->values[max_index][0] > 0.99) correct++;
+	}
+	
+	return correct;
+}
 
 
 /*
@@ -125,7 +154,7 @@ void train_batch(network_t *net, batch_t *batch, float rate)
 	for (i = 0; i < batch->count; i++)
 		train_backprop(net, batch->samples[i], grad_w, grad_b, delta_w, delta_b);
 	
-	// Finally, update the weights
+	// Finally, update the weights and bias
 	m = rate / ((float) batch->count);
 	
 	// Iterate through the different layers and update
@@ -184,7 +213,7 @@ void train_backprop(network_t *net, sample_t *sample, matrix_t **grad_w, matrix_
 		return;
 	}
 	if (sample->output->height != net->osize || sample->output->width != 1) {
-		printf("	Input mismatch of sample record #%d! Sample=%dx%d, Network=%d\n", sample->serial, sample->output->width, sample->output->height, net->osize);
+		printf("	Output mismatch of sample record #%d! Sample=%dx%d, Network=%d\n", sample->serial, sample->output->width, sample->output->height, net->osize);
 		return;
 	}
 	
@@ -198,6 +227,7 @@ void train_backprop(network_t *net, sample_t *sample, matrix_t **grad_w, matrix_
 	if (depth <= 0)
 		return;
 	
+	// Start at last layer
 	i = depth - 1;
 	
 	// Calculate BP1

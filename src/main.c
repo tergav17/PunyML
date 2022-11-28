@@ -30,6 +30,9 @@ int main()
 	//printf("Error: %f\n", train_cost(net_execute(net, tset->samples[0]->input), tset->samples[0]->output));
 	
 	//if (net) return 0;
+	
+	printf("Initial performance: %d/%d correct\n", train_correct(net, tset), tset->count);
+	
 	for (j = 0; j < 30; j++) {
 		printf("Starting epoch #%d at cost %f...\n", j, train_cost_batch(net, tset));	
 	
@@ -40,7 +43,7 @@ int main()
 			train_batch(net, sset, 0.05);	
 		}
 		
-		printf("End epoch #%d at cost %f\n", j, train_cost_batch(net, tset));
+		printf("End epoch #%d at cost %f (%d/%d correct)\n", j, train_cost_batch(net, tset), train_correct(net, tset), tset->count);
 	}
 	
 	// Print out network
