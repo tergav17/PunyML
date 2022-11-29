@@ -40,7 +40,7 @@ int main()
 			sset = csv_subset(tset, 10);
 		
 			// Do the training
-			train_batch(net, sset, 0.05);	
+			train_batch(net, sset, 0.3);	
 		}
 		
 		printf("End epoch #%d at cost %f (%d/%d correct)\n", j, train_cost_batch(net, tset), train_correct(net, tset), tset->count);

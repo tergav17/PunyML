@@ -204,7 +204,7 @@ void train_batch(network_t *net, batch_t *batch, float rate)
 void train_backprop(network_t *net, sample_t *sample, matrix_t **grad_w, matrix_t **grad_b, matrix_t **delta_w, matrix_t **delta_b)
 {
 	int i, y, depth;
-	matrix_t *act, *wet;
+	matrix_t *act, *weight_tran;
 	layer_t *l;
 	
 	// Sanity check for training sample
@@ -262,17 +262,17 @@ void train_backprop(network_t *net, sample_t *sample, matrix_t **grad_w, matrix_
 	while (l) {
 		// Calculate BP2
 		// Transpose weights matrix
-		wet = matrix_ntrans(l->next->weight);
+		weight_tran = matrix_ntrans(l->next->weight);
 		
 		// Multiply to get delta
-		matrix_mul(wet, delta_b[i+1], delta_b[i]);
+		matrix_mul(weight_tran, delta_b[i+1], delta_b[i]);
 		
-		// Add derivative of activation function 
+		// Mutliply by derivative of activation function 
 		for (y = 0; y < l->result->height; y++)
-			delta_b[i]->values[y][0] += l->der(l->z->values[y][0]);
+			delta_b[i]->values[y][0] *= l->der(l->z->values[y][0]);
 		
 		// Free newly created matrix
-		matrix_free(wet);
+		matrix_free(weight_tran);
 		
 		// Add to bias gradient (BP3)
 		matrix_add(grad_b[i], delta_b[i], grad_b[i]);
